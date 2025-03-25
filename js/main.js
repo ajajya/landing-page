@@ -75,8 +75,8 @@ if (contactForm) {
             submitButton.textContent = 'Gönderiliyor...';
             submitButton.disabled = true;
 
-            // Send form data to backend
-            const response = await fetch('/api/submit-form', {
+            // Send form data to backend using protocol-relative URL
+            const response = await fetch(`${window.location.protocol}//${window.location.host}/api/submit-form`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
