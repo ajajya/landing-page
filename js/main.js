@@ -72,30 +72,29 @@ if (contactForm) {
         try {
             // Show loading state
             const submitButton = contactForm.querySelector('button[type="submit"]');
-            const originalButtonText = submitButton.textContent;
             submitButton.textContent = 'Gönderiliyor...';
             submitButton.disabled = true;
 
             // Send form data to backend
-            const response = await fetch('/submit-form', {
+            const response = await fetch('/api/submit-form', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 },
                 body: JSON.stringify(formData)
             });
 
-            const result = await response.json();
-
             if (!response.ok) {
+                const result = await response.json();
                 throw new Error(result.error || 'Bir hata oluştu');
             }
 
-            // Show success message
+            const result = await response.json();
             alert('Teşekkürler! Mesajınız başarıyla gönderildi.');
             contactForm.reset();
         } catch (error) {
-            // Show error message
+            console.error('Form error:', error);
             alert(error.message || 'Form gönderilirken bir hata oluştu. Lütfen tekrar deneyin.');
         } finally {
             // Reset button state

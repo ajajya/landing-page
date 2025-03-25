@@ -8,7 +8,12 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type', 'Accept']
+}));
+
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '/')));
 
@@ -16,6 +21,8 @@ app.use(express.static(path.join(__dirname, '/')));
 app.post('/submit-form', async (req, res) => {
     try {
         const { name, email, message } = req.body;
+        
+        console.log('Received form data:', { name, email, message });
 
         // Validate input
         if (!name || !email || !message) {
@@ -29,17 +36,25 @@ app.post('/submit-form', async (req, res) => {
         }
 
         // Send to webhook
-        const response = await axios.post(process.env.WEBHOOK_URL, {
+        const webhookResponse = await axios.post(process.env.WEBHOOK_URL, {
             name,
             email,
             message
         });
 
+        console.log('Webhook response:', webhookResponse.data);
+
         res.json({ success: true, message: 'Form başarıyla gönderildi.' });
     } catch (error) {
-        console.error('Form submission error:', error);
+        console.error('Form submission error:', error.message);
         res.status(500).json({ error: 'Form gönderilirken bir hata oluştu.' });
     }
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ error: 'Sunucu hatası oluştu.' });
 });
 
 app.listen(PORT, () => {
