@@ -59,13 +59,50 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 // Form submission handling
 const contactForm = document.getElementById('contact-form');
 if (contactForm) {
-    contactForm.addEventListener('submit', (e) => {
+    contactForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        // Form validation and submission logic would go here
-        // For now, we'll just show an alert
-        alert('Teşekkürler! Mesajınız gönderildi.');
-        contactForm.reset();
+        // Get form data
+        const formData = {
+            name: contactForm.querySelector('input[type="text"]').value,
+            email: contactForm.querySelector('input[type="email"]').value,
+            message: contactForm.querySelector('textarea').value
+        };
+
+        try {
+            // Show loading state
+            const submitButton = contactForm.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.textContent;
+            submitButton.textContent = 'Gönderiliyor...';
+            submitButton.disabled = true;
+
+            // Send form data to backend
+            const response = await fetch('/submit-form', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || 'Bir hata oluştu');
+            }
+
+            // Show success message
+            alert('Teşekkürler! Mesajınız başarıyla gönderildi.');
+            contactForm.reset();
+        } catch (error) {
+            // Show error message
+            alert(error.message || 'Form gönderilirken bir hata oluştu. Lütfen tekrar deneyin.');
+        } finally {
+            // Reset button state
+            const submitButton = contactForm.querySelector('button[type="submit"]');
+            submitButton.textContent = 'Gönder';
+            submitButton.disabled = false;
+        }
     });
 }
 
