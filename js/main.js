@@ -75,8 +75,8 @@ if (contactForm) {
             submitButton.textContent = 'Gönderiliyor...';
             submitButton.disabled = true;
 
-            // Send form data to backend using protocol-relative URL
-            const response = await fetch(`${window.location.protocol}//${window.location.host}/api/submit-form`, {
+            // Send form data to backend
+            const response = await fetch('/api/submit-form', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -85,12 +85,19 @@ if (contactForm) {
                 body: JSON.stringify(formData)
             });
 
+            let result;
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                result = await response.json();
+            } else {
+                throw new Error('Sunucudan geçersiz yanıt alındı');
+            }
+
             if (!response.ok) {
-                const result = await response.json();
                 throw new Error(result.error || 'Bir hata oluştu');
             }
 
-            const result = await response.json();
+            // Show success message
             alert('Teşekkürler! Mesajınız başarıyla gönderildi.');
             contactForm.reset();
         } catch (error) {
